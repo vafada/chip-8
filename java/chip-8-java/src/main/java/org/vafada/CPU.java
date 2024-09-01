@@ -32,6 +32,10 @@ public class CPU {
             memory[i] = chip8_fontset[i];
         }
         */
+        /*for(int i = 0; i < 100; i++) {
+            gfx[i] = 1;
+        }*/
+        gfx[0] = 1;
     }
 
     int count = 0;
@@ -216,5 +220,9 @@ public class CPU {
 
     private static String shortToHex(short val) {
         return String.format("%1$04X", val);
+    }
+
+    public byte getPixel(int pos) {
+        return gfx[pos];
     }
 }
