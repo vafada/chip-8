@@ -1,5 +1,7 @@
 package org.vafada;
 
+import java.util.Random;
+
 public class CPU {
     private short opcode;
     private byte[] memory = new byte[4096];
@@ -16,6 +18,7 @@ public class CPU {
     // stack pointer
     private short sp;
     private byte[] key = new byte[16];
+    Random rand = new Random();
 
     public CPU() {
         pc = 0x200;  // Program counter starts at 0x200
@@ -163,6 +166,15 @@ public class CPU {
             case 0xA000: {
                 I = (short) (opcode & 0x0FFF);
                 System.out.println("Annn - LD I, addr: setting value of register I = 0x" + shortToHex(I));
+            }
+            break;
+            case 0xC000: {
+                short x = (short) ((opcode & 0x0F00) >> 8);
+                int randInt = rand.nextInt(256);
+                short kk = (short) (opcode & 0x00FF);
+
+                V[x] = randInt & kk;
+                System.out.println("Cxkk - RND Vx, byte: " + shortToHex(opcode) + " x = " + x + " kk = " + kk);
             }
             break;
             case 0xD000: {
