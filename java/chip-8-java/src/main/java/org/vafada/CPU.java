@@ -144,6 +144,13 @@ public class CPU {
                         V[x] = V[y];
                     }
                     break;
+                    case 0x0001: {
+                        byte x = (byte) ((opcode & 0x0F00) >> 8);
+                        byte y = (byte) ((opcode & 0x00F0) >> 4);
+                        System.out.println("8xy1 - OR Vx, Vy: " + shortToHex(opcode) + " x = " + x + " y = " + y + " V[x] = " + V[x] + " V[y] = " + V[y]);
+                        V[x] = V[x] | V[y];
+                    }
+                    break;
                     case 0x0004: {
                         byte x = (byte) ((opcode & 0x0F00) >> 8);
                         byte y = (byte) ((opcode & 0x00F0) >> 4);
@@ -186,6 +193,18 @@ public class CPU {
                 byte y = (byte) ((opcode & 0x00F0) >> 4);
                 byte nibble = (byte) (opcode & 0x000F);
                 System.out.println("Dxyn - DRW Vx, Vy, nibble: " + shortToHex(opcode) + " x = " + x + " y = " + y + " nibble = " + nibble);
+                V[0xF] = 0;
+                byte pixel;
+                for (int yline = 0; yline < nibble; yline++) {
+                    pixel = memory[I + yline];
+                    for (int xline = 0; xline < 8; xline++) {
+                        if ((pixel & (0x80 >> xline)) != 0) {
+                            if (gfx[(x + xline + ((y + yline) * 64))] == 1)
+                                V[0xF] = 1;
+                            gfx[x + xline + ((y + yline) * 64)] ^= 1;
+                        }
+                    }
+                }
             }
             break;
 
