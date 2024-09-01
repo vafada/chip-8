@@ -4,6 +4,11 @@ import io.github.libsdl4j.api.event.SDL_Event;
 import io.github.libsdl4j.api.render.SDL_Renderer;
 import io.github.libsdl4j.api.video.SDL_Window;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import static io.github.libsdl4j.api.Sdl.SDL_Init;
 import static io.github.libsdl4j.api.Sdl.SDL_Quit;
 import static io.github.libsdl4j.api.SdlSubSystemConst.SDL_INIT_EVERYTHING;
@@ -20,6 +25,28 @@ import static io.github.libsdl4j.api.video.SdlVideoConst.SDL_WINDOWPOS_CENTERED;
 
 public class Main {
     public static void main(String[] args) {
+        if (args.length == 0) {
+            System.out.println("Enter ROM file ");
+            System.exit(1);
+        }
+
+        CPU cpu = new CPU();
+
+        String romFileString = args[0];
+        Path path = Paths.get(romFileString);
+        try {
+            byte[] bytes = Files.readAllBytes(path);
+            cpu.loadProgram(bytes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        for (;;) {
+            cpu.emulateCycle();
+        }
+
+
+/*
         // Initialize SDL
         int result = SDL_Init(SDL_INIT_EVERYTHING);
         if (result != 0) {
@@ -58,11 +85,11 @@ public class Main {
                         break;
                     case SDL_KEYDOWN:
                         if (evt.key.keysym.sym == SDLK_SPACE) {
-                            System.out.println("SPACE pressed");
+                            //System.out.println("SPACE pressed");
                         }
                         break;
                     case SDL_WINDOWEVENT:
-                        System.out.println("Window event " + evt.window.event);
+                        //System.out.println("Window event " + evt.window.event);
                     default:
                         break;
                 }
@@ -70,5 +97,7 @@ public class Main {
         }
 
         SDL_Quit();
+
+ */
     }
 }
