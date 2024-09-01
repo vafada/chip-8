@@ -189,19 +189,29 @@ public class CPU {
             }
             break;
             case 0xD000: {
-                short x = (short) ((opcode & 0x0F00) >> 8);
+                byte x = (byte) ((opcode & 0x0F00) >> 8);
                 byte y = (byte) ((opcode & 0x00F0) >> 4);
-                byte nibble = (byte) (opcode & 0x000F);
-                System.out.println("Dxyn - DRW Vx, Vy, nibble: " + shortToHex(opcode) + " x = " + x + " y = " + y + " nibble = " + nibble);
+                byte height = (byte) (opcode & 0x000F);
+                System.out.println("Dxyn - DRW Vx, Vy, nibble: " + shortToHex(opcode) + " x = " + x + " y = " + y + " nibble = " + height);
                 V[0xF] = 0;
                 byte pixel;
-                for (int yline = 0; yline < nibble; yline++) {
+                for (int yline = 0; yline < height; yline++) {
                     pixel = memory[I + yline];
                     for (int xline = 0; xline < 8; xline++) {
                         if ((pixel & (0x80 >> xline)) != 0) {
-                            if (gfx[(x + xline + ((y + yline) * 64))] == 1)
-                                V[0xF] = 1;
-                            gfx[x + xline + ((y + yline) * 64)] ^= 1;
+                            // wrap pixels if they're drawn off screen
+                            int xCoord = (V[x] + xline) % 64;
+                            int yCoord = (V[y] + yline) % 32;
+
+                            //if (xCoord < 64 && yCoord < 32) {
+                                int position = yCoord * 32 + xCoord;
+                                // if pixel already exists, set carry (collision)
+                                if (gfx[position] == 1) {
+                                    V[0xF] = 1;
+                                }
+                                // draw via xor
+                                gfx[position] ^= 1;
+                            //}
                         }
                     }
                 }

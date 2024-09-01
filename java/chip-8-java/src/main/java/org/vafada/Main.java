@@ -131,17 +131,18 @@ public class Main {
             SDL_Rect rect = new SDL_Rect();
             rect.x = 0;
             rect.y = 0;
-            rect.w = 1024;
-            rect.h = 512;
+            rect.w = WINDOW_WIDTH;
+            rect.h = WINDOW_HEIGHT;
 
-            if (SDL_FillRect(surface, rect, BLACK) != 0) {
+            if (SDL_FillRect(surface, rect, 0x123400FF) != 0) {
                 throw new AssertionError("SDL Failure: " + SDL_GetError());
             }
+
             int y = 0;
             while (y < CHIP_8_HEIGHT) {
                 int x = 0;
                 while (x < CHIP_8_WIDTH) {
-                    byte pixel = cpu.getPixel(y * CHIP_8_WIDTH + x);
+                    byte pixel = cpu.getPixel(y * CHIP_8_HEIGHT + x);
                     int val = BLACK;
                     if (pixel == 1) {
                         val = WHITE;
