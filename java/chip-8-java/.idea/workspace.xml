@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4b16206b-187d-403b-9406-5a95a546e0d4" name="Changes" comment="gfx">
+    <list default="true" id="4b16206b-187d-403b-9406-5a95a546e0d4" name="Changes" comment="I can draw!">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/vafada/CPU.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/vafada/CPU.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/vafada/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/vafada/Main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -86,7 +85,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1725208048371</updated>
-      <workItem from="1725208049491" duration="15502000" />
+      <workItem from="1725208049491" duration="15625000" />
     </task>
     <task id="LOCAL-00001" summary="bootstrap">
       <option name="closed" value="true" />
@@ -120,7 +119,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725223261868</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="I can draw!">
+      <option name="closed" value="true" />
+      <created>1725223572948</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1725223572948</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -130,6 +137,7 @@
     <MESSAGE value="bootstrap" />
     <MESSAGE value="opcode" />
     <MESSAGE value="gfx" />
-    <option name="LAST_COMMIT_MESSAGE" value="gfx" />
+    <MESSAGE value="I can draw!" />
+    <option name="LAST_COMMIT_MESSAGE" value="I can draw!" />
   </component>
 </project>

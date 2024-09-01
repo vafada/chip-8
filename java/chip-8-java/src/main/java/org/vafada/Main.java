@@ -41,6 +41,12 @@ import static io.github.libsdl4j.api.video.SdlVideoConst.SDL_WINDOWPOS_CENTERED;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
+        int WINDOW_WIDTH = 1024;
+        int WINDOW_HEIGHT = 512;
+
+        int CHIP_8_WIDTH = 64;
+        int CHIP_8_HEIGHT = 32;
+
         int WHITE = 0xFFFFFFFF;
         int BLACK = 0x000000FF;
         if (args.length == 0) {
@@ -71,7 +77,7 @@ public class Main {
         }
 
         // Create and init the window
-        SDL_Window window = SDL_CreateWindow("Demo SDL2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 512, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+        SDL_Window window = SDL_CreateWindow("Demo SDL2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
         if (window == null) {
             throw new IllegalStateException("Unable to create SDL window: " + SDL_GetError());
         }
@@ -132,10 +138,10 @@ public class Main {
                 throw new AssertionError("SDL Failure: " + SDL_GetError());
             }
             int y = 0;
-            while (y < 32) {
+            while (y < CHIP_8_HEIGHT) {
                 int x = 0;
-                while (x < 64) {
-                    byte pixel = cpu.getPixel(y * 64 + x);
+                while (x < CHIP_8_WIDTH) {
+                    byte pixel = cpu.getPixel(y * CHIP_8_WIDTH + x);
                     int val = BLACK;
                     if (pixel == 1) {
                         val = WHITE;
@@ -144,8 +150,8 @@ public class Main {
                     SDL_Rect innerRect = new SDL_Rect();
                     innerRect.x = x;
                     innerRect.y = y;
-                    innerRect.w = 1024 / 64;
-                    innerRect.h = 512 / 32;
+                    innerRect.w = WINDOW_WIDTH / CHIP_8_WIDTH;
+                    innerRect.h = WINDOW_HEIGHT / CHIP_8_HEIGHT;
                     if (SDL_FillRect(surface, innerRect, val) != 0) {
                         throw new AssertionError("SDL Failure: " + SDL_GetError());
                     }
