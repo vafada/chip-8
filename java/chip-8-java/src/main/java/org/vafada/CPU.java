@@ -35,7 +35,7 @@ public class CPU {
         /*for(int i = 0; i < 100; i++) {
             gfx[i] = 1;
         }*/
-        gfx[0] = 1;
+
     }
 
     int count = 0;

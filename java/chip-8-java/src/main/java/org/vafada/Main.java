@@ -117,6 +117,20 @@ public class Main {
                 }
             }
 
+            SDL_Surface.Ref surfaceRef = new SDL_Surface.Ref();
+            if (SDL_LockTextureToSurface(texture, null, surfaceRef) != 0) {
+                throw new AssertionError("SDL Failure: " + SDL_GetError());
+            }
+            SDL_Surface surface = surfaceRef.getSurface();
+            SDL_Rect rect = new SDL_Rect();
+            rect.x = 0;
+            rect.y = 0;
+            rect.w = 1024;
+            rect.h = 512;
+
+            if (SDL_FillRect(surface, rect, BLACK) != 0) {
+                throw new AssertionError("SDL Failure: " + SDL_GetError());
+            }
             int y = 0;
             while (y < 32) {
                 int x = 0;
@@ -127,31 +141,23 @@ public class Main {
                         val = WHITE;
                     }
 
+                    SDL_Rect innerRect = new SDL_Rect();
+                    innerRect.x = x;
+                    innerRect.y = y;
+                    innerRect.w = 1024 / 64;
+                    innerRect.h = 512 / 32;
+                    if (SDL_FillRect(surface, innerRect, val) != 0) {
+                        throw new AssertionError("SDL Failure: " + SDL_GetError());
+                    }
 
-                    SDL_Surface.Ref surfaceRef = new SDL_Surface.Ref();
-                    if (SDL_LockTextureToSurface(texture, null, surfaceRef) != 0) {
-                        throw new AssertionError("SDL Failure: " + SDL_GetError());
-                    }
-                    SDL_Surface surface = surfaceRef.getSurface();
-                    SDL_Rect rect = new SDL_Rect();
-                    rect.x = x;
-                    rect.y = y;
-                    rect.w = 100;
-                    rect.h = 100;
-                    //rect.w = 1024 / 64;
-                    //rect.h = 512 / 32;
-                    if (SDL_FillRect(surface, rect, val) != 0) {
-                        throw new AssertionError("SDL Failure: " + SDL_GetError());
-                    }
-                    SDL_UnlockTexture(texture);
-                    SDL_RenderCopy(renderer, texture, null, rect);
-                    SDL_RenderPresent(renderer);
                     x = x + 1;
                 }
                 y = y + 1;
             }
 
-
+            SDL_UnlockTexture(texture);
+            SDL_RenderCopy(renderer, texture, null, rect);
+            SDL_RenderPresent(renderer);
 
             Thread.sleep(16);
         }
