@@ -14,7 +14,7 @@ public class CPU {
     private short I;
     // Program Counter
     private short pc;
-    private byte[] gfx = new byte[64 * 32];
+    private int[][] gfx = new int[CHIP_8_WIDTH][CHIP_8_HEIGHT];
     private byte delayTimer;
     private byte soundTimer;
     private short[] stack = new short[16];
@@ -35,11 +35,17 @@ public class CPU {
             memory[i] = chip8_fontset[i];
         }
         */
-        for(int i = 0; i < CHIP_8_WIDTH; i++) {
+        //for(int i = 0; i < CHIP_8_WIDTH; i++) {
             //gfx[i] = (byte)(i % 2);
             //gfx[i] = 1;
-            //System.out.println("i = " + i);
-        }
+            //debugLog("i = " + i);
+        //}
+        /*gfx[0] = 1;
+        gfx[2] = 1;
+        gfx[65] = 1;
+        gfx[66] = 1;
+        gfx[67] = 1;
+        gfx[128] = 1;*/
 
     }
 
@@ -47,79 +53,80 @@ public class CPU {
 
     public void emulateCycle() {
         count++;
-        //System.out.println("count = " + count);
+        //debugLog("count = " + count);
         // Fetch opcode
         opcode = (short) (memory[pc] << 8 | (memory[pc + 1] & 0xFF));
 
         /*
         String debugString = String.format("%16s", Integer.toBinaryString(opcode)).replace(' ', '0');
-        System.out.println("debugString = " + debugString);
-        System.out.println(Integer.toHexString(opcode));
+        debugLog("debugString = " + debugString);
+        debugLog(Integer.toHexString(opcode));
 
-        System.out.println("first part = " + (opcode & 0xF000));
+        debugLog("first part = " + (opcode & 0xF000));
          */
 
 
         /*
         String hex = Integer.toHexString(memory[pc] & 0xffff);
-        System.out.println(hex);
+        debugLog(hex);
 
         hex = Integer.toHexString(memory[pc + 1] & 0xffff);
-        System.out.println(hex);
+        debugLog(hex);
 
          */
 /*
         String hex = Integer.toBinaryString(memory[pc] << 8);
         //String hex = Integer.toBinaryString(opcode);
-        System.out.println("bin = " + hex);
+        debugLog("bin = " + hex);
 
         hex = Integer.toBinaryString((memory[pc + 1] ));
         //String hex = Integer.toBinaryString(opcode);
-        System.out.println("bin2 = " + hex);
+        debugLog("bin2 = " + hex);
 
         //hex = Integer.toHexString(opcode & 0xffff);
         hex = Integer.toHexString(opcode);
-        System.out.println(hex);
+        debugLog(hex);
 
         hex = Integer.toBinaryString(opcode);
-        System.out.println(hex);
+        debugLog(hex);
 */
         String hexOpCode = shortToHex(opcode);
-        // System.out.println(hexOpCode);
+        // debugLog(hexOpCode);
 
         // Decode opcode
         switch (opcode & 0xF000) {
             case 0x0000: {
                 switch (opcode & 0x000F) {
                     case 0x0000: // 0x00E0: Clears the screen
-                        // System.out.println("CLS");
+                        debugLog("CLS");
+                        clearGFX();
                         break;
 
                     case 0x000E: // 0x00EE: Returns from subroutine
-                        System.out.println("RET");
+                        debugLog("RET");
                         break;
 
                     default:
-                        System.out.println("Unknown opcode: " + hexOpCode);
+                        debugLog("Unknown opcode: " + hexOpCode);
                 }
             }
             break;
             case 0x1000: {
                 short nnn = (short) (opcode & 0x0FFF);
                 pc = nnn;
-                System.out.println("1nnn - JP addr: " + shortToHex(opcode) + " nnn = " + nnn);
+                debugLog("1nnn - JP addr: " + shortToHex(opcode) + " nnn = " + nnn);
             }
             case 0x2000: {
                 stack[sp] = pc;
                 sp++;
                 pc = (short) (opcode & 0x0FFF);
-                System.out.println("2nnn - CALL addr: setting pc = 0x" + shortToHex(pc));
+                debugLog("2nnn - CALL addr: setting pc = 0x" + shortToHex(pc));
             }
             break;
             case 0x3000: {
                 short x = (short) ((opcode & 0x0F00) >> 8);
                 byte kk = (byte) (opcode & 0x00FF);
-                System.out.println("3xkk - SE Vx, byte: " + shortToHex(opcode) + " x = " + x + " kk = " + kk + " V[x] = " + V[x]);
+                debugLog("3xkk - SE Vx, byte: " + shortToHex(opcode) + " x = " + x + " kk = " + kk + " V[x] = " + V[x]);
                 if (V[x] == kk) {
                     pc = (short) (pc + 2);
                 }
@@ -128,16 +135,16 @@ public class CPU {
             case 0x6000: {
                 short x = (short) ((opcode & 0x0F00) >> 8);
                 byte kk = (byte) (opcode & 0x00FF);
-                System.out.println("6xkk - LD Vx, byte: " + shortToHex(opcode) + " x = " + x + " kk = " + kk);
+                debugLog("6xkk - LD Vx, byte: " + shortToHex(opcode) + " x = " + x + " kk = " + kk);
                 V[x] = kk;
             }
             break;
             case 0x7000: {
                 byte x = (byte) ((opcode & 0x0F00) >> 8);
                 byte kk = (byte) (opcode & 0x00FF);
-                System.out.println("7xkk - ADD Vx, byte: " + shortToHex(opcode) + " x = " + x + " kk = " + kk);
+                debugLog("7xkk - ADD Vx, byte: " + shortToHex(opcode) + " x = " + x + " kk = " + kk);
                 V[x] = V[x] + kk;
-                // System.out.println("V[x] = " + V[x]);
+                // debugLog("V[x] = " + V[x]);
             }
             break;
             case 0x8000: {
@@ -145,14 +152,14 @@ public class CPU {
                     case 0x0000: {
                         byte x = (byte) ((opcode & 0x0F00) >> 8);
                         byte y = (byte) ((opcode & 0x00F0) >> 4);
-                        System.out.println("8xy0 - LD Vx, Vy: " + shortToHex(opcode) + " x = " + x + " y = " + y + " V[x] = " + V[x] + " V[y] = " + V[y]);
+                        debugLog("8xy0 - LD Vx, Vy: " + shortToHex(opcode) + " x = " + x + " y = " + y + " V[x] = " + V[x] + " V[y] = " + V[y]);
                         V[x] = V[y];
                     }
                     break;
                     case 0x0001: {
                         byte x = (byte) ((opcode & 0x0F00) >> 8);
                         byte y = (byte) ((opcode & 0x00F0) >> 4);
-                        System.out.println("8xy1 - OR Vx, Vy: " + shortToHex(opcode) + " x = " + x + " y = " + y + " V[x] = " + V[x] + " V[y] = " + V[y]);
+                        debugLog("8xy1 - OR Vx, Vy: " + shortToHex(opcode) + " x = " + x + " y = " + y + " V[x] = " + V[x] + " V[y] = " + V[y]);
                         V[x] = V[x] | V[y];
                     }
                     break;
@@ -164,7 +171,7 @@ public class CPU {
 
                         int sum = xVal + yVal;
 
-                        System.out.println("TODO: 8xy4 - ADD Vx, Vy: " + shortToHex(opcode) + " x = " + x + " y = " + y + " V[x] = " + V[x] + " V[y] = " + V[y] + " sum = " + sum);
+                        debugLog("TODO: 8xy4 - ADD Vx, Vy: " + shortToHex(opcode) + " x = " + x + " y = " + y + " V[x] = " + V[x] + " V[y] = " + V[y] + " sum = " + sum);
                         if (sum > 255) {
                             V[0xF] = 1;
                         } else {
@@ -175,13 +182,13 @@ public class CPU {
                     break;
 
                     default:
-                        System.out.println("Unknown opcode: " + hexOpCode);
+                        debugLog("Unknown opcode: " + hexOpCode);
                 }
             }
             break;
             case 0xA000: {
                 I = (short) (opcode & 0x0FFF);
-                System.out.println("Annn - LD I, addr: setting value of register I = 0x" + shortToHex(I));
+                debugLog("Annn - LD I, addr: setting value of register I = 0x" + shortToHex(I));
             }
             break;
             case 0xC000: {
@@ -190,42 +197,41 @@ public class CPU {
                 short kk = (short) (opcode & 0x00FF);
 
                 V[x] = randInt & kk;
-                System.out.println("Cxkk - RND Vx, byte: " + shortToHex(opcode) + " x = " + x + " kk = " + kk);
+                debugLog("Cxkk - RND Vx, byte: " + shortToHex(opcode) + " x = " + x + " kk = " + kk);
             }
             break;
             case 0xD000: {
                 int x = V[((opcode & 0x0F00) >> 8)];
                 int y = V[((opcode & 0x00F0) >> 4)];
                 byte height = (byte) (opcode & 0x000F);
-                System.out.println("Dxyn - DRW Vx, Vy, nibble: " + shortToHex(opcode) + " x = " + x + " y = " + y + " nibble = " + height);
+                debugLog("Dxyn - DRW Vx, Vy, nibble: " + shortToHex(opcode) + " x = " + x + " y = " + y + " nibble = " + height);
                 V[0xF] = 0;
 
                 for (int yline = 0; yline < height; yline++) {
                     byte pixel = memory[I + yline];
                     for (int xline = 0; xline < 8; xline++) {
                         if ((pixel & (0x80 >> xline)) != 0) {
-                            // wrap pixels if they're drawn off screen
                             int xCoord = x + xline;
                             int yCoord = y + yline;
 
+                            System.out.println("x = " + xCoord + " y = " + yCoord);
 
-                            int position = yCoord * 32 + xCoord;
+                            //int position = yCoord * 32 + xCoord;
                             // if pixel already exists, set carry (collision)
-                            if (gfx[position] == 1) {
+                            if (gfx[xCoord][yCoord] == 1) {
                                 V[0xF] = 1;
                             }
                             // draw via xor
-                            gfx[position] ^= 1;
+                            //gfx[position] ^= 1;
+                            gfx[xCoord][yCoord] = gfx[xCoord][yCoord] ^ 1;
 
                         }
                     }
                 }
             }
             break;
-
-
             default:
-                System.out.println("Unknown opcode: " + hexOpCode);
+                debugLog("Unknown opcode: " + hexOpCode);
         }
 
         // Update timers
@@ -234,7 +240,7 @@ public class CPU {
 
         if (soundTimer > 0) {
             if (soundTimer == 1) {
-                System.out.println("BEEP!");
+                debugLog("BEEP!");
             }
             --soundTimer;
         }
@@ -246,17 +252,32 @@ public class CPU {
         for (int i = 0; i < program.length; i++) {
             memory[i + 512] = program[i];
         }
-
-        /*System.out.println("memory");
-        System.out.println(Integer.toHexString(memory[pc + 1]));*/
-
     }
 
     private static String shortToHex(short val) {
         return String.format("%1$04X", val);
     }
 
-    public byte getPixel(int pos) {
-        return gfx[pos];
+    public int getPixel(int x, int y) {
+        return gfx[x][y];
+    }
+    private void debugLog(String s) {
+        // System.out.println(s);
+    }
+    public void logGFX() {
+        for (int y = 0; y < CHIP_8_HEIGHT; y++) {
+            for (int x = 0; x < CHIP_8_WIDTH; x++) {
+                System.out.print(gfx[x][y]);
+            }
+            System.out.println("\n");
+        }
+    }
+
+    public void clearGFX() {
+        for(int y = 0; y < CHIP_8_HEIGHT; y++) {
+            for(int x = 0; x < CHIP_8_WIDTH; x++) {
+                gfx[x][y] = 0;
+            }
+        }
     }
 }

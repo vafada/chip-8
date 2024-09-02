@@ -1,8 +1,5 @@
 package org.vafada;
 
-import com.sun.jna.Pointer;
-import com.sun.jna.ptr.IntByReference;
-import com.sun.jna.ptr.PointerByReference;
 import io.github.libsdl4j.api.event.SDL_Event;
 import io.github.libsdl4j.api.rect.SDL_Rect;
 import io.github.libsdl4j.api.render.SDL_Renderer;
@@ -46,6 +43,9 @@ public class Main {
         int CHIP_8_WIDTH = 64;
         int CHIP_8_HEIGHT = 32;
 
+        int PIXEL_WIDTH = WINDOW_WIDTH / CHIP_8_WIDTH;
+        int PIXEL_HEIGHT = WINDOW_HEIGHT / CHIP_8_HEIGHT;
+
         int WHITE = 0xFFFFFFFF;
         int BLACK = 0x000000FF;
         if (args.length == 0) {
@@ -63,11 +63,6 @@ public class Main {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        /*for (;;) {
-            cpu.emulateCycle();
-        }*/
-
 
         // Initialize SDL
         int result = SDL_Init(SDL_INIT_EVERYTHING);
@@ -93,14 +88,7 @@ public class Main {
             throw new IllegalStateException("Unable to create SDL texture: " + SDL_GetError());
         }
 
-        /*SDL_SetRenderDrawColor(renderer, (byte) 0, (byte) 0, (byte) 0, (byte) 0);
-
-        // Clear the window and make it all red
-        SDL_RenderClear(renderer);
-
-        // Render the changes above ( which up until now had just happened behind the scenes )
-        SDL_RenderPresent(renderer);*/
-
+        int count = 0;
         // Start an event loop and react to events
         SDL_Event evt = new SDL_Event();
         boolean shouldRun = true;
@@ -141,32 +129,45 @@ public class Main {
             while (y < CHIP_8_HEIGHT) {
                 int x = 0;
                 while (x < CHIP_8_WIDTH) {
-                    byte pixel = cpu.getPixel(y * CHIP_8_WIDTH + x);
+                    int pixel = cpu.getPixel(x, y);
                     int val = BLACK;
                     if (pixel == 1) {
                         val = WHITE;
                     }
 
+                    if (val == WHITE) {
+                        System.out.println("RECT: x = " + x + " y = " + y + " index = " + (y * CHIP_8_WIDTH + x));
+                    }
+
                     SDL_Rect innerRect = new SDL_Rect();
                     innerRect.x = x;
                     innerRect.y = y;
-                    innerRect.w = WINDOW_WIDTH / CHIP_8_WIDTH;
-                    innerRect.h = WINDOW_HEIGHT / CHIP_8_HEIGHT;
+                    innerRect.w = PIXEL_WIDTH;
+                    innerRect.h = PIXEL_HEIGHT;
                     if (SDL_FillRect(surface, innerRect, val) != 0) {
                         throw new AssertionError("SDL Failure: " + SDL_GetError());
                     }
 
-                    x = x + 1;
+                    x++;
                 }
-                y = y + 1;
+                y++;
             }
+
+
 
             SDL_UnlockTexture(texture);
             SDL_RenderCopy(renderer, texture, null, rect);
             SDL_RenderPresent(renderer);
 
             Thread.sleep(16);
+            //Thread.sleep(500);
             //System.exit(0);
+            count++;
+            /*System.out.println("count = " + count);
+            if (count == 6) {
+                cpu.logGFX();
+                break;
+            }*/
         }
 
         SDL_Quit();
