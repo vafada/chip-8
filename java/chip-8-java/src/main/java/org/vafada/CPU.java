@@ -332,8 +332,26 @@ public class CPU {
                 nextInstruction();
             }
             break;
+            /*case 0xE000: {
+
+            }
+            break;
+
+             */
             case 0xF000: {
                 switch (opcode & 0x00FF) {
+                    case 0x0007: {
+                        byte x = (byte) ((opcode & 0x0F00) >> 8);
+                        V[x] = delayTimer;
+                        debugLog("Fx07 - LD Vx, DT");
+                        nextInstruction();
+                    }
+                    break;
+                    case 0x000A: {
+                        // TODO
+                        nextInstruction();
+                    }
+                    break;
                     case 0x0015: {
                         byte x = (byte) ((opcode & 0x0F00) >> 8);
                         debugLog("Fx15 - LD DT, Vx");
@@ -351,14 +369,14 @@ public class CPU {
                     case 0x001E: {
                         byte x = (byte) ((opcode & 0x0F00) >> 8);
                         debugLog("Fx1E - ADD I, Vx");
-                        I = (short)(I + ((short) V[x]));
+                        I = (short) (I + ((short) V[x]));
                         nextInstruction();
                     }
                     break;
                     case 0x0029: {
                         byte x = (byte) ((opcode & 0x0F00) >> 8);
                         debugLog("Fx29 - LD F, Vx");
-                        I = (short)(V[x] * 5);
+                        I = (short) (V[x] * 5);
                         nextInstruction();
                     }
                     break;
@@ -371,16 +389,16 @@ public class CPU {
                         System.out.println("xVal = " + xVal);
 
                         // hundreds
-                        memory[I] = (byte)((xVal / 100) % 10);
+                        memory[I] = (byte) ((xVal / 100) % 10);
                         // tens
-                        memory[I+1] = (byte)((xVal / 10) % 10);
+                        memory[I + 1] = (byte) ((xVal / 10) % 10);
                         // ones
-                        memory[I+2] = (byte)(xVal % 10);
+                        memory[I + 2] = (byte) (xVal % 10);
 
                         System.out.println("I = " + I);
                         System.out.println("memory = " + memory[I]);
-                        System.out.println("memory 1 = " + memory[I+1]);
-                        System.out.println("memory 2 = " + memory[I+2]);
+                        System.out.println("memory 1 = " + memory[I + 1]);
+                        System.out.println("memory 2 = " + memory[I + 2]);
 
                         nextInstruction();
                     }
