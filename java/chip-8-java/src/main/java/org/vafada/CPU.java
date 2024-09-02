@@ -6,12 +6,12 @@ public class CPU {
     private final int CHIP_8_WIDTH = 64;
     private final int CHIP_8_HEIGHT = 32;
 
-    private short opcode;
+    private int opcode;
     private byte[] memory = new byte[4096];
     // registers
     private int[] V = new int[16];
     // register "I"
-    private short I;
+    private int I;
     // Program Counter
     private int pc;
     private int[][] gfx = new int[CHIP_8_WIDTH][CHIP_8_HEIGHT];
@@ -19,7 +19,7 @@ public class CPU {
     private int soundTimer;
     private int[] stack = new int[16];
     // stack pointer
-    private short sp;
+    private int sp;
     private byte[] key = new byte[16];
     Random rand = new Random();
 
@@ -116,7 +116,7 @@ public class CPU {
             }
             break;
             case 0x1000: {
-                short nnn = (short) (opcode & 0x0FFF);
+                int nnn = (opcode & 0x0FFF);
                 pc = nnn;
                 debugLog("1nnn - JP addr: " + shortToHex(opcode) + " nnn = " + nnn);
             }
@@ -124,7 +124,7 @@ public class CPU {
             case 0x2000: {
                 sp++;
                 stack[sp] = pc + 2;
-                pc = (short) (opcode & 0x0FFF);
+                pc = (opcode & 0x0FFF);
                 debugLog("2nnn - CALL addr: setting pc = 0x" + shortToHex(pc));
             }
             break;
@@ -284,7 +284,7 @@ public class CPU {
             }
             break;
             case 0xA000: {
-                I = (short) (opcode & 0x0FFF);
+                I = (opcode & 0x0FFF);
                 debugLog("Annn - LD I, addr: setting value of register I = 0x" + shortToHex(I) + " I = " + I);
                 nextInstruction();
             }
