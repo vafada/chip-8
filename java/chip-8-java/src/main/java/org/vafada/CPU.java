@@ -1,6 +1,5 @@
 package org.vafada;
 
-import java.util.Arrays;
 import java.util.Random;
 
 public class CPU {
@@ -16,8 +15,8 @@ public class CPU {
     // Program Counter
     private int pc;
     private int[][] gfx = new int[CHIP_8_WIDTH][CHIP_8_HEIGHT];
-    private byte delayTimer;
-    private byte soundTimer;
+    private int delayTimer;
+    private int soundTimer;
     private int[] stack = new int[16];
     // stack pointer
     private short sp;
@@ -38,9 +37,9 @@ public class CPU {
         }
         */
         //for(int i = 0; i < CHIP_8_WIDTH; i++) {
-            //gfx[i] = (byte)(i % 2);
-            //gfx[i] = 1;
-            //debugLog("i = " + i);
+        //gfx[i] = (byte)(i % 2);
+        //gfx[i] = 1;
+        //debugLog("i = " + i);
         //}
         /*gfx[0] = 1;
         gfx[2] = 1;
@@ -112,7 +111,7 @@ public class CPU {
                         break;
 
                     default:
-                        System.out.println("Unknown opcode: " + hexOpCode);
+                        errorLog("Unknown opcode: " + hexOpCode);
                 }
             }
             break;
@@ -195,6 +194,21 @@ public class CPU {
                         V[x] = V[x] | V[y];
                         nextInstruction();
                     }
+                    case 0x0002: {
+                        byte x = (byte) ((opcode & 0x0F00) >> 8);
+                        byte y = (byte) ((opcode & 0x00F0) >> 4);
+                        debugLog("8xy2 - AND Vx, Vy: " + shortToHex(opcode) + " x = " + x + " y = " + y + " V[x] = " + V[x] + " V[y] = " + V[y]);
+                        V[x] = V[x] & V[y];
+                        nextInstruction();
+                    }
+                    break;
+                    case 0x0003: {
+                        byte x = (byte) ((opcode & 0x0F00) >> 8);
+                        byte y = (byte) ((opcode & 0x00F0) >> 4);
+                        debugLog("8xy3 - XOR Vx, Vy: " + shortToHex(opcode) + " x = " + x + " y = " + y + " V[x] = " + V[x] + " V[y] = " + V[y]);
+                        V[x] = V[x] ^ V[y];
+                        nextInstruction();
+                    }
                     break;
                     case 0x0004: {
                         byte x = (byte) ((opcode & 0x0F00) >> 8);
@@ -210,13 +224,48 @@ public class CPU {
                         } else {
                             V[0xF] = 0;
                         }
-                        V[x] = (sum & 0x00FF);
+                        V[x] = sum;
+                        nextInstruction();
+                    }
+                    break;
+                    case 0x0005: {
+                        byte x = (byte) ((opcode & 0x0F00) >> 8);
+                        byte y = (byte) ((opcode & 0x00F0) >> 4);
+                        int xVal = V[x];
+                        int yVal = V[y];
+
+                        int diff = xVal - yVal;
+
+                        debugLog("8xy5 - SUB Vx, Vy: " + shortToHex(opcode) + " x = " + x + " y = " + y + " V[x] = " + V[x] + " V[y] = " + V[y] + " diff = " + diff);
+                        if (xVal > yVal) {
+                            V[0xF] = 1;
+                        } else {
+                            V[0xF] = 0;
+                        }
+                        V[x] = diff;
+                        nextInstruction();
+                    }
+                    break;
+                    case 0x0006: {
+                        byte x = (byte) ((opcode & 0x0F00) >> 8);
+                        int xVal = V[x];
+                        V[0xF] = xVal & 1;
+                        V[x] = xVal >> 1;
+                        nextInstruction();
+                    }
+                    break;
+                    case 0x000E: {
+                        byte x = (byte) ((opcode & 0x0F00) >> 8);
+                        int xVal = V[x];
+                        V[0xF] = xVal >> 7;
+                        debugLog("8xyE - SHL Vx {, Vy}: " + shortToHex(opcode) + " x = " + x + " V[x] = " + V[x]);
+                        V[x] = xVal << 1;
                         nextInstruction();
                     }
                     break;
 
                     default:
-                        System.out.println("Unknown opcode: " + hexOpCode);
+                        errorLog("Unknown opcode: " + hexOpCode);
                 }
             }
             break;
@@ -277,8 +326,77 @@ public class CPU {
                 nextInstruction();
             }
             break;
+            case 0xF000: {
+                switch (opcode & 0x00FF) {
+                    case 0x0015: {
+                        byte x = (byte) ((opcode & 0x0F00) >> 8);
+                        debugLog("Fx15 - LD DT, Vx");
+                        delayTimer = V[x];
+                        nextInstruction();
+                    }
+                    break;
+                    case 0x0018: {
+                        byte x = (byte) ((opcode & 0x0F00) >> 8);
+                        debugLog("Fx18 - LD ST, Vx");
+                        soundTimer = V[x];
+                        nextInstruction();
+                    }
+                    break;
+                    case 0x001E: {
+                        byte x = (byte) ((opcode & 0x0F00) >> 8);
+                        debugLog("Fx1E - ADD I, Vx");
+                        I = (short)(I + ((short) V[x]));
+                        nextInstruction();
+                    }
+                    break;
+                    case 0x0029: {
+                        byte x = (byte) ((opcode & 0x0F00) >> 8);
+                        debugLog("Fx29 - LD F, Vx");
+                        I = (short)(V[x] * 5);
+                        nextInstruction();
+                    }
+                    break;
+                    case 0x0033: {
+                        byte x = (byte) ((opcode & 0x0F00) >> 8);
+                        debugLog("Fx33 - LD B, Vx");
+                        int xVal = Math.abs(V[x]);
+
+                        // hundreds
+                        memory[I] = (byte)((xVal / 100) % 10);
+                        // tens
+                        memory[I+1] = (byte)((xVal / 10) % 10);
+                        // ones
+                        memory[I+2] = (byte)(xVal % 10);
+
+                        nextInstruction();
+                    }
+                    break;
+                    case 0x0055: {
+                        byte x = (byte) ((opcode & 0x0F00) >> 8);
+                        debugLog("Fx55 - LD [I], Vx");
+                        for (int i = 0; i <= x; i++) {
+                            memory[I + i] = (byte) V[i];
+                        }
+                        nextInstruction();
+                    }
+                    break;
+                    case 0x0065: {
+                        byte x = (byte) ((opcode & 0x0F00) >> 8);
+                        debugLog("Fx65 - LD Vx, [I]");
+                        for (int i = 0; i <= x; i++) {
+                            V[i] = memory[I + i];
+                        }
+                        nextInstruction();
+                    }
+                    break;
+
+                    default:
+                        errorLog("Unknown opcode: " + hexOpCode);
+                }
+            }
+            break;
             default:
-                System.out.println("Unknown opcode: " + hexOpCode);
+                errorLog("Unknown opcode: " + hexOpCode);
         }
 
         // Update timers
@@ -304,9 +422,15 @@ public class CPU {
     public int getPixel(int x, int y) {
         return gfx[x][y];
     }
+
     private void debugLog(String s) {
-        System.out.println(s);
+        // System.out.println(s);
     }
+
+    private void errorLog(String s) {
+        System.err.println(s);
+    }
+
     public void logGFX() {
         for (int y = 0; y < CHIP_8_HEIGHT; y++) {
             for (int x = 0; x < CHIP_8_WIDTH; x++) {
@@ -317,8 +441,8 @@ public class CPU {
     }
 
     public void clearGFX() {
-        for(int y = 0; y < CHIP_8_HEIGHT; y++) {
-            for(int x = 0; x < CHIP_8_WIDTH; x++) {
+        for (int y = 0; y < CHIP_8_HEIGHT; y++) {
+            for (int x = 0; x < CHIP_8_WIDTH; x++) {
                 gfx[x][y] = 0;
             }
         }
