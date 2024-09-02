@@ -121,7 +121,7 @@ public class Main {
             rect.w = WINDOW_WIDTH;
             rect.h = WINDOW_HEIGHT;
 
-            if (SDL_FillRect(surface, rect, 0x123400FF) != 0) {
+            if (SDL_FillRect(surface, rect, BLACK) != 0) {
                 throw new AssertionError("SDL Failure: " + SDL_GetError());
             }
 
@@ -135,9 +135,9 @@ public class Main {
                         val = WHITE;
                     }
 
-                    if (val == WHITE) {
+                    /*if (val == WHITE) {
                         System.out.println("RECT: x = " + x + " y = " + y + " index = " + (y * CHIP_8_WIDTH + x));
-                    }
+                    }*/
 
                     SDL_Rect innerRect = new SDL_Rect();
                     innerRect.x = x;

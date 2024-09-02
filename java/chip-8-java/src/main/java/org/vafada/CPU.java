@@ -13,11 +13,11 @@ public class CPU {
     // register "I"
     private short I;
     // Program Counter
-    private short pc;
+    private int pc;
     private int[][] gfx = new int[CHIP_8_WIDTH][CHIP_8_HEIGHT];
     private byte delayTimer;
     private byte soundTimer;
-    private short[] stack = new short[16];
+    private int[] stack = new int[16];
     // stack pointer
     private short sp;
     private byte[] key = new byte[16];
@@ -28,6 +28,7 @@ public class CPU {
         opcode = 0;  // Reset current opcode
         I = 0;       // Reset index register
         sp = 0;      // Reset stack pointer
+        clearGFX();
 
         // TODO: Load fontset
         /*
@@ -100,10 +101,11 @@ public class CPU {
                     case 0x0000: // 0x00E0: Clears the screen
                         debugLog("CLS");
                         clearGFX();
+                        nextInstruction();
                         break;
 
                     case 0x000E: // 0x00EE: Returns from subroutine
-                        debugLog("RET");
+                        debugLog("TODO: RET");
                         break;
 
                     default:
@@ -116,6 +118,7 @@ public class CPU {
                 pc = nnn;
                 debugLog("1nnn - JP addr: " + shortToHex(opcode) + " nnn = " + nnn);
             }
+            break;
             case 0x2000: {
                 stack[sp] = pc;
                 sp++;
@@ -129,6 +132,9 @@ public class CPU {
                 debugLog("3xkk - SE Vx, byte: " + shortToHex(opcode) + " x = " + x + " kk = " + kk + " V[x] = " + V[x]);
                 if (V[x] == kk) {
                     pc = (short) (pc + 2);
+                    skipInstruction();
+                } else {
+                    nextInstruction();
                 }
             }
             break;
@@ -137,6 +143,7 @@ public class CPU {
                 byte kk = (byte) (opcode & 0x00FF);
                 debugLog("6xkk - LD Vx, byte: " + shortToHex(opcode) + " x = " + x + " kk = " + kk);
                 V[x] = kk;
+                nextInstruction();
             }
             break;
             case 0x7000: {
@@ -144,7 +151,7 @@ public class CPU {
                 byte kk = (byte) (opcode & 0x00FF);
                 debugLog("7xkk - ADD Vx, byte: " + shortToHex(opcode) + " x = " + x + " kk = " + kk);
                 V[x] = V[x] + kk;
-                // debugLog("V[x] = " + V[x]);
+                nextInstruction();
             }
             break;
             case 0x8000: {
@@ -154,6 +161,7 @@ public class CPU {
                         byte y = (byte) ((opcode & 0x00F0) >> 4);
                         debugLog("8xy0 - LD Vx, Vy: " + shortToHex(opcode) + " x = " + x + " y = " + y + " V[x] = " + V[x] + " V[y] = " + V[y]);
                         V[x] = V[y];
+                        nextInstruction();
                     }
                     break;
                     case 0x0001: {
@@ -161,6 +169,7 @@ public class CPU {
                         byte y = (byte) ((opcode & 0x00F0) >> 4);
                         debugLog("8xy1 - OR Vx, Vy: " + shortToHex(opcode) + " x = " + x + " y = " + y + " V[x] = " + V[x] + " V[y] = " + V[y]);
                         V[x] = V[x] | V[y];
+                        nextInstruction();
                     }
                     break;
                     case 0x0004: {
@@ -178,6 +187,7 @@ public class CPU {
                             V[0xF] = 0;
                         }
                         V[x] = (sum & 0x00FF);
+                        nextInstruction();
                     }
                     break;
 
@@ -189,6 +199,7 @@ public class CPU {
             case 0xA000: {
                 I = (short) (opcode & 0x0FFF);
                 debugLog("Annn - LD I, addr: setting value of register I = 0x" + shortToHex(I));
+                nextInstruction();
             }
             break;
             case 0xC000: {
@@ -198,6 +209,7 @@ public class CPU {
 
                 V[x] = randInt & kk;
                 debugLog("Cxkk - RND Vx, byte: " + shortToHex(opcode) + " x = " + x + " kk = " + kk);
+                nextInstruction();
             }
             break;
             case 0xD000: {
@@ -214,7 +226,7 @@ public class CPU {
                             int xCoord = x + xline;
                             int yCoord = y + yline;
 
-                            System.out.println("x = " + xCoord + " y = " + yCoord);
+                            // System.out.println("x = " + xCoord + " y = " + yCoord);
 
                             //int position = yCoord * 32 + xCoord;
                             // if pixel already exists, set carry (collision)
@@ -222,12 +234,12 @@ public class CPU {
                                 V[0xF] = 1;
                             }
                             // draw via xor
-                            //gfx[position] ^= 1;
-                            gfx[xCoord][yCoord] = gfx[xCoord][yCoord] ^ 1;
+                            gfx[xCoord][yCoord] ^= 1;
 
                         }
                     }
                 }
+                nextInstruction();
             }
             break;
             default:
@@ -244,8 +256,6 @@ public class CPU {
             }
             --soundTimer;
         }
-
-        pc = (short) (pc + 2);
     }
 
     public void loadProgram(byte[] program) {
@@ -254,7 +264,7 @@ public class CPU {
         }
     }
 
-    private static String shortToHex(short val) {
+    private static String shortToHex(int val) {
         return String.format("%1$04X", val);
     }
 
@@ -262,7 +272,7 @@ public class CPU {
         return gfx[x][y];
     }
     private void debugLog(String s) {
-        // System.out.println(s);
+        System.out.println(s);
     }
     public void logGFX() {
         for (int y = 0; y < CHIP_8_HEIGHT; y++) {
@@ -279,5 +289,13 @@ public class CPU {
                 gfx[x][y] = 0;
             }
         }
+    }
+
+    private void nextInstruction() {
+        pc = pc + 2;
+    }
+
+    private void skipInstruction() {
+        pc = pc + 4;
     }
 }
