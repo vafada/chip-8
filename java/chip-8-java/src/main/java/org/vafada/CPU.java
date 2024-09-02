@@ -1,5 +1,6 @@
 package org.vafada;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class CPU {
@@ -27,7 +28,7 @@ public class CPU {
         pc = 0x200;  // Program counter starts at 0x200
         opcode = 0;  // Reset current opcode
         I = 0;       // Reset index register
-        sp = 0;      // Reset stack pointer
+        sp = -1;      // Reset stack pointer
         clearGFX();
 
         // TODO: Load fontset
@@ -105,11 +106,13 @@ public class CPU {
                         break;
 
                     case 0x000E: // 0x00EE: Returns from subroutine
-                        debugLog("TODO: RET");
+                        pc = stack[sp];
+                        sp--;
+                        debugLog("RET: pc = " + pc);
                         break;
 
                     default:
-                        debugLog("Unknown opcode: " + hexOpCode);
+                        System.out.println("Unknown opcode: " + hexOpCode);
                 }
             }
             break;
@@ -120,8 +123,8 @@ public class CPU {
             }
             break;
             case 0x2000: {
-                stack[sp] = pc;
                 sp++;
+                stack[sp] = pc + 2;
                 pc = (short) (opcode & 0x0FFF);
                 debugLog("2nnn - CALL addr: setting pc = 0x" + shortToHex(pc));
             }
@@ -131,7 +134,28 @@ public class CPU {
                 byte kk = (byte) (opcode & 0x00FF);
                 debugLog("3xkk - SE Vx, byte: " + shortToHex(opcode) + " x = " + x + " kk = " + kk + " V[x] = " + V[x]);
                 if (V[x] == kk) {
-                    pc = (short) (pc + 2);
+                    skipInstruction();
+                } else {
+                    nextInstruction();
+                }
+            }
+            break;
+            case 0x4000: {
+                short x = (short) ((opcode & 0x0F00) >> 8);
+                byte kk = (byte) (opcode & 0x00FF);
+                debugLog("4xkk - SNE Vx, byte");
+                if (V[x] != kk) {
+                    skipInstruction();
+                } else {
+                    nextInstruction();
+                }
+            }
+            break;
+            case 0x5000: {
+                short x = (short) ((opcode & 0x0F00) >> 8);
+                short y = (short) ((opcode & 0x00F0) >> 4);
+                debugLog("5xy0 - SE Vx, Vy");
+                if (V[x] == V[y]) {
                     skipInstruction();
                 } else {
                     nextInstruction();
@@ -192,8 +216,19 @@ public class CPU {
                     break;
 
                     default:
-                        debugLog("Unknown opcode: " + hexOpCode);
+                        System.out.println("Unknown opcode: " + hexOpCode);
                 }
+            }
+            break;
+            case 0x9000: {
+                short x = (short) ((opcode & 0x0F00) >> 8);
+                short y = (short) ((opcode & 0x00F0) >> 4);
+                if (V[x] != V[y]) {
+                    skipInstruction();
+                } else {
+                    nextInstruction();
+                }
+                debugLog("9xy0 - SNE Vx, Vy");
             }
             break;
             case 0xA000: {
@@ -243,7 +278,7 @@ public class CPU {
             }
             break;
             default:
-                debugLog("Unknown opcode: " + hexOpCode);
+                System.out.println("Unknown opcode: " + hexOpCode);
         }
 
         // Update timers
@@ -252,16 +287,14 @@ public class CPU {
 
         if (soundTimer > 0) {
             if (soundTimer == 1) {
-                debugLog("BEEP!");
+                System.out.println("BEEP!");
             }
             --soundTimer;
         }
     }
 
     public void loadProgram(byte[] program) {
-        for (int i = 0; i < program.length; i++) {
-            memory[i + 512] = program[i];
-        }
+        System.arraycopy(program, 0, memory, 512, program.length);
     }
 
     private static String shortToHex(int val) {
