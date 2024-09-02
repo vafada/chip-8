@@ -285,7 +285,7 @@ public class CPU {
             break;
             case 0xA000: {
                 I = (short) (opcode & 0x0FFF);
-                debugLog("Annn - LD I, addr: setting value of register I = 0x" + shortToHex(I));
+                debugLog("Annn - LD I, addr: setting value of register I = 0x" + shortToHex(I) + " I = " + I);
                 nextInstruction();
             }
             break;
