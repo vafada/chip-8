@@ -56,7 +56,7 @@ public class CPU {
         count++;
         //debugLog("count = " + count);
         // Fetch opcode
-        opcode = (short) (memory[pc] << 8 | (memory[pc + 1] & 0xFF));
+        opcode = (memory[pc] << 8 | (memory[pc + 1] & 0xFF));
 
         /*
         String debugString = String.format("%16s", Integer.toBinaryString(opcode)).replace(' ', '0');
