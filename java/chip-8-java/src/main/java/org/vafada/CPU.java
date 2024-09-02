@@ -3,6 +3,9 @@ package org.vafada;
 import java.util.Random;
 
 public class CPU {
+    private final int CHIP_8_WIDTH = 64;
+    private final int CHIP_8_HEIGHT = 32;
+
     private short opcode;
     private byte[] memory = new byte[4096];
     // registers
@@ -32,9 +35,11 @@ public class CPU {
             memory[i] = chip8_fontset[i];
         }
         */
-        /*for(int i = 0; i < 100; i++) {
-            gfx[i] = 1;
-        }*/
+        for(int i = 0; i < CHIP_8_WIDTH; i++) {
+            //gfx[i] = (byte)(i % 2);
+            //gfx[i] = 1;
+            //System.out.println("i = " + i);
+        }
 
     }
 
@@ -189,29 +194,29 @@ public class CPU {
             }
             break;
             case 0xD000: {
-                byte x = (byte) ((opcode & 0x0F00) >> 8);
-                byte y = (byte) ((opcode & 0x00F0) >> 4);
+                int x = V[((opcode & 0x0F00) >> 8)];
+                int y = V[((opcode & 0x00F0) >> 4)];
                 byte height = (byte) (opcode & 0x000F);
                 System.out.println("Dxyn - DRW Vx, Vy, nibble: " + shortToHex(opcode) + " x = " + x + " y = " + y + " nibble = " + height);
                 V[0xF] = 0;
-                byte pixel;
+
                 for (int yline = 0; yline < height; yline++) {
-                    pixel = memory[I + yline];
+                    byte pixel = memory[I + yline];
                     for (int xline = 0; xline < 8; xline++) {
                         if ((pixel & (0x80 >> xline)) != 0) {
                             // wrap pixels if they're drawn off screen
-                            int xCoord = (V[x] + xline) % 64;
-                            int yCoord = (V[y] + yline) % 32;
+                            int xCoord = x + xline;
+                            int yCoord = y + yline;
 
-                            //if (xCoord < 64 && yCoord < 32) {
-                                int position = yCoord * 32 + xCoord;
-                                // if pixel already exists, set carry (collision)
-                                if (gfx[position] == 1) {
-                                    V[0xF] = 1;
-                                }
-                                // draw via xor
-                                gfx[position] ^= 1;
-                            //}
+
+                            int position = yCoord * 32 + xCoord;
+                            // if pixel already exists, set carry (collision)
+                            if (gfx[position] == 1) {
+                                V[0xF] = 1;
+                            }
+                            // draw via xor
+                            gfx[position] ^= 1;
+
                         }
                     }
                 }

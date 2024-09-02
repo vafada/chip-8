@@ -28,7 +28,6 @@ import static io.github.libsdl4j.api.render.SDL_RendererFlags.SDL_RENDERER_ACCEL
 import static io.github.libsdl4j.api.render.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING;
 import static io.github.libsdl4j.api.render.SdlRender.SDL_CreateRenderer;
 import static io.github.libsdl4j.api.render.SdlRender.SDL_CreateTexture;
-import static io.github.libsdl4j.api.render.SdlRender.SDL_LockTexture;
 import static io.github.libsdl4j.api.render.SdlRender.SDL_LockTextureToSurface;
 import static io.github.libsdl4j.api.render.SdlRender.SDL_RenderCopy;
 import static io.github.libsdl4j.api.render.SdlRender.SDL_RenderPresent;
@@ -142,7 +141,7 @@ public class Main {
             while (y < CHIP_8_HEIGHT) {
                 int x = 0;
                 while (x < CHIP_8_WIDTH) {
-                    byte pixel = cpu.getPixel(y * CHIP_8_HEIGHT + x);
+                    byte pixel = cpu.getPixel(y * CHIP_8_WIDTH + x);
                     int val = BLACK;
                     if (pixel == 1) {
                         val = WHITE;
@@ -167,6 +166,7 @@ public class Main {
             SDL_RenderPresent(renderer);
 
             Thread.sleep(16);
+            //System.exit(0);
         }
 
         SDL_Quit();
