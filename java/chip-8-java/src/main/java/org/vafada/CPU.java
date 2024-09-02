@@ -170,9 +170,13 @@ public class CPU {
             break;
             case 0x7000: {
                 byte x = (byte) ((opcode & 0x0F00) >> 8);
-                byte kk = (byte) (opcode & 0x00FF);
+                int kk = (opcode & 0x00FF);
                 debugLog("7xkk - ADD Vx, byte: " + shortToHex(opcode) + " x = " + x + " kk = " + kk);
-                V[x] = V[x] + kk;
+                int sum = V[x] + kk;
+                if (sum > 255) {
+                    sum -= 256;
+                }
+                V[x] = sum;
                 nextInstruction();
             }
             break;
@@ -210,17 +214,10 @@ public class CPU {
                     }
                     break;
                     case 0x0004: {
-                        System.out.println("Begin: 8xy4 - ADD Vx, Vy----");
                         byte x = (byte) ((opcode & 0x0F00) >> 8);
                         byte y = (byte) ((opcode & 0x00F0) >> 4);
                         int xVal = V[x];
                         int yVal = V[y];
-
-                        System.out.println("x = " + x);
-                        System.out.println("y = " + y);
-
-                        System.out.println("xVal = " + xVal);
-                        System.out.println("yVal = " + yVal);
 
                         int sum = xVal + yVal;
 
@@ -230,9 +227,8 @@ public class CPU {
                         } else {
                             V[0xF] = 0;
                         }
-                        V[x] = sum;
+                        V[x] = sum & 0xFF;
                         nextInstruction();
-                        System.out.println("End: 8xy4 - ADD Vx, Vy----");
                     }
                     break;
                     case 0x0005: {
