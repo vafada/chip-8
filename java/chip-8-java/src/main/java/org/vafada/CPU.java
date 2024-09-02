@@ -130,7 +130,7 @@ public class CPU {
             break;
             case 0x3000: {
                 short x = (short) ((opcode & 0x0F00) >> 8);
-                byte kk = (byte) (opcode & 0x00FF);
+                int kk = (opcode & 0x00FF);
                 debugLog("3xkk - SE Vx, byte: " + shortToHex(opcode) + " x = " + x + " kk = " + kk + " V[x] = " + V[x]);
                 if (V[x] == kk) {
                     skipInstruction();
@@ -141,7 +141,7 @@ public class CPU {
             break;
             case 0x4000: {
                 short x = (short) ((opcode & 0x0F00) >> 8);
-                byte kk = (byte) (opcode & 0x00FF);
+                int kk = (opcode & 0x00FF);
                 debugLog("4xkk - SNE Vx, byte");
                 if (V[x] != kk) {
                     skipInstruction();
@@ -292,7 +292,7 @@ public class CPU {
             case 0xC000: {
                 short x = (short) ((opcode & 0x0F00) >> 8);
                 int randInt = rand.nextInt(256);
-                short kk = (short) (opcode & 0x00FF);
+                int kk = (opcode & 0x00FF);
 
                 V[x] = randInt & kk;
                 debugLog("Cxkk - RND Vx, byte: " + shortToHex(opcode) + " x = " + x + " kk = " + kk);
@@ -440,7 +440,7 @@ public class CPU {
     }
 
     private void debugLog(String s) {
-        System.out.println(s);
+        // System.out.println(s);
     }
 
     private void errorLog(String s) {
