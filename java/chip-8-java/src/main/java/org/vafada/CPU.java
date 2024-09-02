@@ -216,9 +216,15 @@ public class CPU {
                         int xVal = V[x];
                         int yVal = V[y];
 
+                        System.out.println("x = " + x);
+                        System.out.println("y = " + y);
+
+                        System.out.println("xVal = " + xVal);
+                        System.out.println("yVal = " + yVal);
+
                         int sum = xVal + yVal;
 
-                        debugLog("TODO: 8xy4 - ADD Vx, Vy: " + shortToHex(opcode) + " x = " + x + " y = " + y + " V[x] = " + V[x] + " V[y] = " + V[y] + " sum = " + sum);
+                        debugLog("8xy4 - ADD Vx, Vy: " + shortToHex(opcode) + " x = " + x + " y = " + y + " V[x] = " + V[x] + " V[y] = " + V[y] + " sum = " + sum);
                         if (sum > 255) {
                             V[0xF] = 1;
                         } else {
@@ -359,7 +365,10 @@ public class CPU {
                     case 0x0033: {
                         byte x = (byte) ((opcode & 0x0F00) >> 8);
                         debugLog("Fx33 - LD B, Vx");
-                        int xVal = Math.abs(V[x]);
+                        System.out.println("x = " + x);
+                        int xVal = V[x];
+
+                        System.out.println("xVal = " + xVal);
 
                         // hundreds
                         memory[I] = (byte)((xVal / 100) % 10);
@@ -367,6 +376,11 @@ public class CPU {
                         memory[I+1] = (byte)((xVal / 10) % 10);
                         // ones
                         memory[I+2] = (byte)(xVal % 10);
+
+                        System.out.println("I = " + I);
+                        System.out.println("memory = " + memory[I]);
+                        System.out.println("memory 1 = " + memory[I+1]);
+                        System.out.println("memory 2 = " + memory[I+2]);
 
                         nextInstruction();
                     }
