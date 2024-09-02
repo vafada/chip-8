@@ -254,8 +254,8 @@ public class CPU {
                         int xVal = V[x];
                         V[0xF] = xVal & 1;
                         V[x] = xVal >> 1;
-                        nextInstruction();
-                    }
+                        debugLog("8xy6 - SHR Vx {, Vy}: " + shortToHex(opcode) + " x = " + x + " V[x] = " + V[x]);
+                        nextInstruction();}
                     break;
                     case 0x000E: {
                         byte x = (byte) ((opcode & 0x0F00) >> 8);
@@ -313,9 +313,6 @@ public class CPU {
                             int xCoord = x + xline;
                             int yCoord = y + yline;
 
-                            // System.out.println("x = " + xCoord + " y = " + yCoord);
-
-                            //int position = yCoord * 32 + xCoord;
                             // if pixel already exists, set carry (collision)
                             if (gfx[xCoord][yCoord] == 1) {
                                 V[0xF] = 1;
@@ -380,23 +377,13 @@ public class CPU {
                     case 0x0033: {
                         byte x = (byte) ((opcode & 0x0F00) >> 8);
                         debugLog("Fx33 - LD B, Vx");
-                        System.out.println("x = " + x);
                         int xVal = V[x];
-
-                        System.out.println("xVal = " + xVal);
-
                         // hundreds
                         memory[I] = (byte) ((xVal / 100) % 10);
                         // tens
                         memory[I + 1] = (byte) ((xVal / 10) % 10);
                         // ones
                         memory[I + 2] = (byte) (xVal % 10);
-
-                        System.out.println("I = " + I);
-                        System.out.println("memory = " + memory[I]);
-                        System.out.println("memory 1 = " + memory[I + 1]);
-                        System.out.println("memory 2 = " + memory[I + 2]);
-
                         nextInstruction();
                     }
                     break;
@@ -453,7 +440,7 @@ public class CPU {
     }
 
     private void debugLog(String s) {
-        // System.out.println(s);
+        System.out.println(s);
     }
 
     private void errorLog(String s) {
